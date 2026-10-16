@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANIME VERSE</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#080811;color:#fff;
+  font-family:Arial,sans-serif;
+}
+header{
+  padding:24px 16px;text-align:center;
+  background:linear-gradient(135deg,#17172c,#35105b);
+  border-bottom:2px solid #9b5cff;
+}
+header h1{margin:0;color:#c69aff;letter-spacing:4px}
+header p{color:#ccc;font-size:13px}
+main{max-width:700px;margin:auto;padding:18px}
+.card{
+  background:#151522;border:1px solid #34344d;
+  padding:18px;border-radius:14px;margin-bottom:16px;
+}
+h2{color:#c69aff;margin-top:0}
+input,select,button{
+  width:100%;padding:13px;margin:7px 0;
+  border-radius:8px;border:1px solid #45455e;
+  font-size:15px;
+}
+input,select{background:#0d0d18;color:white}
+button{
+  background:#914cff;color:white;font-weight:bold;
+  border:0;cursor:pointer;
+}
+button:disabled{opacity:.5}
+.small{font-size:12px;color:#aaa}
+.row{
+  display:flex;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid #333;
+  gap:10px;
+}
+.badge{color:#c69aff}
+.hidden{display:none}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>ANIME VERSE</h1>
+  <p>ONE UNIVERSE · FIVE GANGS · FIFTY MEMBERS</p>
+</header>
+
+<main>
+  <section class="card" id="authCard">
+    <h2>Enter the Universe</h2>
+    <input id="email" type="email" placeholder="Email address">
+    <input id="password" type="password" placeholder="Password (6+ characters)">
+    <button id="signupBtn">Create Account</button>
+    <button id="loginBtn">Login</button>
+    <p class="small">Use your own email. Never share your password.</p>
+    <p id="authMessage"></p>
+  </section>
+
+  <section class="card hidden" id="profileCard">
+    <h2>Your Profile</h2>
+    <p id="userEmail"></p>
+    <p>Role: <span class="badge">Member</span></p>
+    <p id="gangName">Gang: Not assigned yet</p>
+    <button id="logoutBtn">Logout</button>
+  </section>
+
+  <section class="card">
+    <h2>⚔️ The Five Gangs</h2>
+    <div id="gangs"></div>
+  </section>
+
+  <section class="card">
+    <h2>🏆 Leaderboard</h2>
+    <p class="small">Live points and rankings will appear here after secure database setup.</p>
+    <div id="leaderboard">No leaderboard data yet.</div>
+  </section>
+
+  <section class="card">
+    <h2>Universe Rules</h2>
+    <p>• Respect every member.</p>
+    <p>• Each gang has a maximum of 10 members.</p>
+    <p>• Points and roles must be managed by authorized leaders.</p>
+    <p>• No one can become an admin simply by creating an account.</p>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from
+  "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAYebNPxeKKcV4kXL-sNABfvO-i7I0d5E0",
+  authDomain: "anime-verse-6ed4f.firebaseapp.com",
+  projectId: "anime-verse-6ed4f",
+  storageBucket: "anime-verse-6ed4f.firebasestorage.app",
+  messagingSenderId: "904492295346",
+  appId: "1:904492295346:web:7a8960fbc9641f9a7a55ab",
+  measurementId: "G-JBKC211T2Y"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const $ = id => document.getElementById(id);
+
+const gangNames = [
+  "Shadow Gang",
+  "Phantom Gang",
+  "Akatsuki Gang",
+  "Titan Gang",
+  "Dragon Gang"
+];
+
+$("gangs").innerHTML = gangNames.map((name, i) => `
+  <div class="row">
+    <span>${i + 1}. ${name}</span>
+    <span class="badge">0 / 10 members</span>
+  </div>
+`).join("");
+
+function showMessage(message) {
+  $("authMessage").textContent = message;
+}
+
+$("signupBtn").addEventListener("click", async () => {
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  if (!email || password.length < 6) {
+    showMessage("Enter a valid email and password of at least 6 characters.");
+    return;
+  }
+
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    showMessage("Account created successfully!");
+  } catch (error) {
+    showMessage(error.message);
+  }
+});
+
+$("loginBtn").addEventListener("click", async () => {
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    showMessage("Login successful!");
+  } catch (error) {
+    showMessage(error.message);
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+onAuthStateChanged(auth, user => {
+  $("authCard").classList.toggle("hidden", !!user);
+  $("profileCard").classList.toggle("hidden", !user);
+
+  if (user) {
+    $("userEmail").textContent = user.email;
+    $("gangName").textContent = "Gang: Not assigned yet";
+  }
+});
+</script>
+</body>
+  </html>
